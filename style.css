@@ -1,0 +1,53 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 20px;
+  background-color: #f3f3f3;
+  color: #333;
+}
+
+h1, h2 {
+  color: #0077cc;
+}
+
+input, button, select {
+  display: block;
+  margin: 10px 0;
+  padding: 8px;
+  font-size: 16px;
+  width: 300px;
+}
+
+button {
+  background-color: #0077cc;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #005fa3;
+}
+
+#dashboard {
+  border-top: 1px solid #ccc;
+  margin-top: 30px;
+  padding-top: 20px;
+}
+
+#resultados {
+  background-color: #fff;
+  border: 1px solid #ccc;
+  padding: 15px;
+  margin-top: 20px;
+  white-space: pre-wrap;
+}
+
+.mensaje {
+  margin-top: 20px;
+  padding: 10px;
+  border: 2px solid #0077cc;
+  background-color: #e6f3ff;
+  color: #004b80;
+  font-weight: bold;
+  width: 300px;
+}
