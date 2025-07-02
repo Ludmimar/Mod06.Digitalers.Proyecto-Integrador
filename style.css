@@ -49,5 +49,21 @@ button:hover {
   background-color: #e6f3ff;
   color: #004b80;
   font-weight: bold;
-  width: 300px;
+  width: 
+  300px;
 }
+
+#mensaje {
+  display: none;
+  position: fixed;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #007bff;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 5px;
+  font-weight: bold;
+  z-index: 1000;
+}
+

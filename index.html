@@ -6,8 +6,8 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  
   <h1>Bienvenido a Fintech</h1>
-
   <div id="login">
     <h2>Login</h2>
     <input type="email" id="email" placeholder="Correo electrónico">
@@ -57,13 +57,32 @@
 
     <!-- ✅ Sección para mostrar resumen de movimientos -->
     <div id="resultados"></div>
-  </div>
 
-  <div id="mensaje" class="mensaje" style="display: none;"></div>
+    <button onclick="mostrarFormularioTransferencia()">Transferir saldo</button>
+
+    <div id="formTransferencia" style="display:none;">
+      <h3>Transferencia de saldo</h3>
+      <input type="text" id="cuentaOrigen" placeholder="Tu cuenta (ej: CTA1234)">
+      <input type="email" id="emailDestino" placeholder="Email del destinatario">
+      <input type="text" id="cuentaDestino" placeholder="Cuenta del destinatario">
+      <input type="number" id="montoTransferencia" placeholder="Monto a transferir">
+      <button onclick="realizarTransferencia()">Confirmar transferencia</button>
+    </div>
+
+  </div>
+<div id="mensaje"></div>
+
 
   <script src="models/Cliente.js"></script>
   <script src="models/Cuenta.js"></script>
   <script src="models/Movimiento.js"></script>
   <script src="app.js"></script>
+  <!-- ✅ Botón para limpiar LocalStorage -->
+  <div id="botonLimpiar" style="text-align:center; margin-top: 30px;">
+  <button onclick="limpiarLocalStorage()" style="background-color: crimson; color: white; padding: 10px 20px; border: none; border-radius: 5px;">
+    Limpiar todos los datos guardados
+  </button>
+  </div>
+
 </body>
 </html>

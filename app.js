@@ -74,6 +74,8 @@ function cargarDesdeLocalStorage() {
       mostrarMensaje(`Bienvenido nuevamente, ${cliente.nombre}`);
     }
   }
+
+  actualizarVisibilidadBotonLimpiar();
 }
 
 function login() {
@@ -93,6 +95,7 @@ function login() {
   } else {
     mostrarMensaje("Credenciales incorrectas o usuario no registrado.");
   }
+  actualizarVisibilidadBotonLimpiar();
 }
 
 function registrarCliente() {
@@ -124,6 +127,8 @@ function registrarCliente() {
   document.getElementById("dni").value = "";
   document.getElementById("nuevoEmail").value = "";
   document.getElementById("nuevoPassword").value = "";
+
+  actualizarVisibilidadBotonLimpiar();
 }
 
 function mostrarFormularioCuenta() {
@@ -232,6 +237,85 @@ function logout() {
   document.getElementById("resultados").innerText = "";
   mostrarMensaje("Sesión cerrada correctamente.");
   guardarEnLocalStorage();
+
+  actualizarVisibilidadBotonLimpiar();
+}
+
+function mostrarFormularioTransferencia() {
+  document.getElementById("formTransferencia").style.display = "block";
+}
+
+function realizarTransferencia() {
+  const cuentaOrigenCodigo = document.getElementById("cuentaOrigen").value.trim();
+  const emailDestino = document.getElementById("emailDestino").value.trim();
+  const cuentaDestinoCodigo = document.getElementById("cuentaDestino").value.trim();
+  const monto = parseFloat(document.getElementById("montoTransferencia").value);
+
+  const cuentaOrigen = clienteActual.cuentas.find(c => c.codigo === cuentaOrigenCodigo);
+
+  if (!cuentaOrigen) {
+    mostrarMensaje("Cuenta origen no encontrada.");
+    return;
+  }
+
+  if (isNaN(monto) || monto <= 0) {
+    mostrarMensaje("Monto inválido.");
+    return;
+  }
+
+  if (monto > cuentaOrigen.saldo) {
+    mostrarMensaje("Saldo insuficiente.");
+    return;
+  }
+
+  const clienteDestino = clientes.find(c => c.email === emailDestino);
+  if (!clienteDestino) {
+    mostrarMensaje("Usuario destino no encontrado.");
+    return;
+  }
+
+  const cuentaDestino = clienteDestino.cuentas.find(c => c.codigo === cuentaDestinoCodigo);
+  if (!cuentaDestino) {
+    mostrarMensaje("Cuenta destino no encontrada.");
+    return;
+  }
+
+  // Realizar la transferencia
+  cuentaOrigen.saldo -= monto;
+  cuentaOrigen.movimientos.push(new Movimiento('transferencia saliente', monto));
+  // Agregar movimiento como "transferencia" en la cuenta destino
+  cuentaDestino.saldo += monto;
+  cuentaDestino.movimientos.push(new Movimiento('transferencia recibida', monto));
+
+  mostrarMensaje("Transferencia realizada con éxito.");
+  guardarEnLocalStorage();
+  actualizarResumenCuentas();
+  mostrarResumenMovimientos();
+
+  // Ocultar y limpiar el formulario
+  document.getElementById("formTransferencia").style.display = "none";
+  document.getElementById("cuentaOrigen").value = "";
+  document.getElementById("emailDestino").value = "";
+  document.getElementById("cuentaDestino").value = "";
+  document.getElementById("montoTransferencia").value = "";
+}
+
+function limpiarLocalStorage() {
+  if (confirm("¿Estás seguro que querés borrar todos los datos? Esta acción es irreversible.")) {
+    localStorage.clear();
+    location.reload(); // Recarga la página para aplicar los cambios
+  }
+}
+
+// Mostrar u ocultar botón limpiar según estado de sesión
+function actualizarVisibilidadBotonLimpiar() {
+  const boton = document.getElementById("botonLimpiar");
+  if(clienteActual) {
+    boton.style.display = "none"; // ocultar si está logueado
+  } else {
+    boton.style.display = "block"; // mostrar si no está logueado
+  }
 }
 
 cargarDesdeLocalStorage();
+
