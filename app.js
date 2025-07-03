@@ -11,7 +11,6 @@ function mostrarMensaje(texto) {
   }, 4000);
 }
 
-// Serializar sin referencias circulares para guardar en localStorage
 function guardarEnLocalStorage() {
   const clientesParaGuardar = clientes.map(cliente => ({
     id: cliente.id,
@@ -32,18 +31,16 @@ function guardarEnLocalStorage() {
   }));
 
   localStorage.setItem("clientes", JSON.stringify(clientesParaGuardar));
-
-  if(clienteActual) {
+  if (clienteActual) {
     localStorage.setItem("clienteActualEmail", clienteActual.email);
   } else {
     localStorage.removeItem("clienteActualEmail");
   }
 }
 
-// Cargar y reconstruir objetos desde localStorage
 function cargarDesdeLocalStorage() {
   const data = localStorage.getItem("clientes");
-  if(data) {
+  if (data) {
     const clientesGuardados = JSON.parse(data);
     clientesGuardados.forEach(c => {
       const cliente = new Cliente(c.id, c.nombre, c.apellido, c.dni, c.email, c.password);
@@ -61,14 +58,15 @@ function cargarDesdeLocalStorage() {
   }
 
   const emailGuardado = localStorage.getItem("clienteActualEmail");
-  if(emailGuardado) {
+  if (emailGuardado) {
     const cliente = clientes.find(c => c.email === emailGuardado);
-    if(cliente) {
+    if (cliente) {
       clienteActual = cliente;
       document.getElementById("login").style.display = "none";
       document.getElementById("registro").style.display = "none";
       document.getElementById("dashboard").style.display = "block";
       document.getElementById("usuarioEmail").innerText = cliente.email;
+      document.getElementById("filtrosMovimientos").style.display = "block";
       actualizarResumenCuentas();
       mostrarResumenMovimientos();
       mostrarMensaje(`Bienvenido nuevamente, ${cliente.nombre}`);
@@ -82,12 +80,13 @@ function login() {
   const email = document.getElementById('email').value.trim();
   const password = document.getElementById('password').value.trim();
   const cliente = clientes.find(c => c.email === email && c.password === password);
-  if(cliente) {
+  if (cliente) {
     clienteActual = cliente;
     document.getElementById('login').style.display = 'none';
     document.getElementById('registro').style.display = 'none';
     document.getElementById('dashboard').style.display = 'block';
     document.getElementById('usuarioEmail').innerText = cliente.email;
+    document.getElementById("filtrosMovimientos").style.display = "block";
     actualizarResumenCuentas();
     mostrarResumenMovimientos();
     mostrarMensaje(`Bienvenido, ${cliente.nombre}`);
@@ -95,7 +94,38 @@ function login() {
   } else {
     mostrarMensaje("Credenciales incorrectas o usuario no registrado.");
   }
+
   actualizarVisibilidadBotonLimpiar();
+}
+
+function logout() {
+  clienteActual = null;
+  document.getElementById("dashboard").style.display = "none";
+  document.getElementById("login").style.display = "block";
+  document.getElementById("registro").style.display = "block";
+  document.getElementById("formCuenta").style.display = "none";
+  document.getElementById("formMovimiento").style.display = "none";
+  document.getElementById("filtrosMovimientos").style.display = "none";
+  document.getElementById("email").value = "";
+  document.getElementById("password").value = "";
+  document.getElementById("resultados").innerText = "";
+  document.getElementById("listaUsuarios").innerHTML = "";
+  mostrarMensaje("Sesión cerrada correctamente.");
+  guardarEnLocalStorage();
+  actualizarVisibilidadBotonLimpiar();
+}
+
+function actualizarVisibilidadBotonLimpiar() {
+  const boton = document.getElementById("botonLimpiar");
+  const verUsuarios = document.getElementById("verUsuarios");
+
+  if (clienteActual) {
+    boton.style.display = "none";
+    verUsuarios.style.display = "none";
+  } else {
+    boton.style.display = "block";
+    verUsuarios.style.display = "block";
+  }
 }
 
 function registrarCliente() {
@@ -105,12 +135,12 @@ function registrarCliente() {
   const email = document.getElementById("nuevoEmail").value.trim();
   const password = document.getElementById("nuevoPassword").value.trim();
 
-  if(!nombre || !apellido || !dni || !email || !password) {
+  if (!nombre || !apellido || !dni || !email || !password) {
     mostrarMensaje("Todos los campos son obligatorios.");
     return;
   }
 
-  if(clientes.some(c => c.email === email)) {
+  if (clientes.some(c => c.email === email)) {
     mostrarMensaje("Ya existe un cliente con ese correo electrónico.");
     return;
   }
@@ -127,8 +157,6 @@ function registrarCliente() {
   document.getElementById("dni").value = "";
   document.getElementById("nuevoEmail").value = "";
   document.getElementById("nuevoPassword").value = "";
-
-  actualizarVisibilidadBotonLimpiar();
 }
 
 function mostrarFormularioCuenta() {
@@ -137,7 +165,7 @@ function mostrarFormularioCuenta() {
 
 function crearCuenta() {
   const monto = document.getElementById("saldoInicial").value;
-  if(isNaN(monto) || monto.trim() === "" || parseFloat(monto) < 0) {
+  if (isNaN(monto) || monto.trim() === "" || parseFloat(monto) < 0) {
     mostrarMensaje("Monto inválido.");
     return;
   }
@@ -150,6 +178,7 @@ function crearCuenta() {
   actualizarResumenCuentas();
   document.getElementById("formCuenta").style.display = "none";
   document.getElementById("saldoInicial").value = "";
+  mostrarResumenMovimientos();
 }
 
 function mostrarFormularioMovimiento() {
@@ -162,22 +191,22 @@ function realizarMovimiento() {
   const monto = parseFloat(document.getElementById("montoMovimiento").value);
   const cuenta = clienteActual.cuentas.find(c => c.codigo === codigoCuenta);
 
-  if(!cuenta) {
+  if (!cuenta) {
     mostrarMensaje("Cuenta no encontrada.");
     return;
   }
 
-  if(isNaN(monto) || monto <= 0) {
+  if (isNaN(monto) || monto <= 0) {
     mostrarMensaje("Monto inválido.");
     return;
   }
 
-  if(tipo === "retiro" && monto > cuenta.saldo) {
+  if (tipo === "retiro" && monto > cuenta.saldo) {
     mostrarMensaje("Fondos insuficientes para el retiro.");
     return;
   }
 
-  if(tipo === "deposito") {
+  if (tipo === "deposito") {
     cuenta.depositar(monto);
     mostrarMensaje("Depósito realizado.");
   } else {
@@ -187,54 +216,84 @@ function realizarMovimiento() {
 
   guardarEnLocalStorage();
   actualizarResumenCuentas();
+  mostrarResumenMovimientos();
 
   document.getElementById("formMovimiento").style.display = "none";
   document.getElementById("codigoMovimiento").value = "";
   document.getElementById("montoMovimiento").value = "";
-
-  mostrarResumenMovimientos();
 }
 
 function mostrarResumenMovimientos() {
   const contenedor = document.getElementById("resultados");
   contenedor.innerHTML = "";
 
+  const filtroCuenta = document.getElementById("filtroCuenta")?.value || "todas";
+  const filtroTipo = document.getElementById("filtroTipo")?.value || "todos";
+
   const titulo = document.createElement("h3");
   titulo.innerText = `Resumen de movimientos para ${clienteActual.nombre} ${clienteActual.apellido}`;
   contenedor.appendChild(titulo);
 
-  if (clienteActual.cuentas.length === 0) {
-    contenedor.innerHTML += "<p>No hay cuentas creadas.</p>";
+  let totalIngresos = 0;
+  let totalEgresos = 0;
+
+  const cuentasFiltradas = filtroCuenta === "todas"
+    ? clienteActual.cuentas
+    : clienteActual.cuentas.filter(c => c.codigo === filtroCuenta);
+
+  if (cuentasFiltradas.length === 0) {
+    contenedor.innerHTML += "<p>No hay cuentas que coincidan con el filtro.</p>";
     return;
   }
 
-  clienteActual.cuentas.forEach(cuenta => {
+  cuentasFiltradas.forEach(cuenta => {
     const divCuenta = document.createElement("div");
     divCuenta.className = "tarjeta-movimiento";
     divCuenta.innerHTML = `<h4>Cuenta: ${cuenta.codigo}</h4>`;
 
-    if (cuenta.movimientos.length === 0) {
-      divCuenta.innerHTML += "<p>Sin movimientos recientes.</p>";
+    let movimientosFiltrados = cuenta.movimientos;
+
+    if (filtroTipo !== "todos") {
+      movimientosFiltrados = movimientosFiltrados.filter(m => m.tipo === filtroTipo);
+    }
+
+    if (movimientosFiltrados.length === 0) {
+      divCuenta.innerHTML += "<p>Sin movimientos para los filtros seleccionados.</p>";
     } else {
       const lista = document.createElement("ul");
-      cuenta.movimientos.slice(-5).reverse().forEach(mov => {
+
+      movimientosFiltrados.slice(-10).reverse().forEach(mov => {
         const item = document.createElement("li");
-        item.innerHTML = `<strong>${mov.tipo.toUpperCase()}</strong> - $${mov.monto} - <em>${mov.fecha.toLocaleString()}</em>`;
+        item.innerHTML = `<strong>${mov.tipo.toUpperCase()}</strong> - $${mov.monto} - <em>${new Date(mov.fecha).toLocaleString()}</em>`;
         lista.appendChild(item);
+
+        if (["deposito", "transferencia recibida"].includes(mov.tipo)) {
+          totalIngresos += mov.monto;
+        } else {
+          totalEgresos += mov.monto;
+        }
       });
+
       divCuenta.appendChild(lista);
     }
 
     contenedor.appendChild(divCuenta);
   });
-}
 
+  const resumenTotales = document.createElement("div");
+  resumenTotales.style.marginTop = "15px";
+  resumenTotales.innerHTML = `
+    <strong>Total Ingresos:</strong> $${totalIngresos.toFixed(2)}<br>
+    <strong>Total Egresos:</strong> $${totalEgresos.toFixed(2)}
+  `;
+  contenedor.appendChild(resumenTotales);
+}
 
 function actualizarResumenCuentas() {
   const contenedor = document.getElementById("listaCuentas");
   contenedor.innerHTML = "";
 
-  if(!clienteActual || clienteActual.cuentas.length === 0) {
+  if (!clienteActual || clienteActual.cuentas.length === 0) {
     contenedor.innerText = "Aún no tenés cuentas creadas.";
     return;
   }
@@ -244,25 +303,17 @@ function actualizarResumenCuentas() {
     div.innerText = `Cuenta: ${cuenta.codigo} | Saldo: $${cuenta.consultarSaldo().toFixed(2)}`;
     contenedor.appendChild(div);
   });
-}
 
-function logout() {
-  clienteActual = null;
-  document.getElementById("dashboard").style.display = "none";
-  document.getElementById("login").style.display = "block";
-  document.getElementById("registro").style.display = "block";
-  document.getElementById("formCuenta").style.display = "none";
-  document.getElementById("formMovimiento").style.display = "none";
-  document.getElementById("email").value = "";
-  document.getElementById("password").value = "";
-  document.getElementById("resultados").innerText = "";
-  mostrarMensaje("Sesión cerrada correctamente.");
-  guardarEnLocalStorage();
-
-  actualizarVisibilidadBotonLimpiar();
-  // 🧽 Limpiar usuarios listados
-  document.getElementById("listaUsuarios").innerHTML = "";
-
+  const filtro = document.getElementById("filtroCuenta");
+  if (filtro) {
+    filtro.innerHTML = `<option value="todas">Todas</option>`;
+    clienteActual.cuentas.forEach(cuenta => {
+      const opt = document.createElement("option");
+      opt.value = cuenta.codigo;
+      opt.innerText = cuenta.codigo;
+      filtro.appendChild(opt);
+    });
+  }
 }
 
 function mostrarFormularioTransferencia() {
@@ -304,10 +355,8 @@ function realizarTransferencia() {
     return;
   }
 
-  // Realizar la transferencia
   cuentaOrigen.saldo -= monto;
   cuentaOrigen.movimientos.push(new Movimiento('transferencia saliente', monto));
-  // Agregar movimiento como "transferencia" en la cuenta destino
   cuentaDestino.saldo += monto;
   cuentaDestino.movimientos.push(new Movimiento('transferencia recibida', monto));
 
@@ -316,35 +365,12 @@ function realizarTransferencia() {
   actualizarResumenCuentas();
   mostrarResumenMovimientos();
 
-  // Ocultar y limpiar el formulario
   document.getElementById("formTransferencia").style.display = "none";
   document.getElementById("cuentaOrigen").value = "";
   document.getElementById("emailDestino").value = "";
   document.getElementById("cuentaDestino").value = "";
   document.getElementById("montoTransferencia").value = "";
 }
-
-function limpiarLocalStorage() {
-  if (confirm("¿Estás seguro que querés borrar todos los datos? Esta acción es irreversible.")) {
-    localStorage.clear();
-    location.reload(); // Recarga la página para aplicar los cambios
-  }
-}
-
-// Mostrar u ocultar botón limpiar según estado de sesión
-function actualizarVisibilidadBotonLimpiar() {
-  const boton = document.getElementById("botonLimpiar");
-  const verUsuarios = document.getElementById("verUsuarios");
-
-  if (clienteActual) {
-    boton.style.display = "none";
-    verUsuarios.style.display = "none";
-  } else {
-    boton.style.display = "block";
-    verUsuarios.style.display = "block";
-  }
-}
-
 
 function mostrarUsuariosRegistrados() {
   const contenedor = document.getElementById("listaUsuarios");
@@ -362,5 +388,11 @@ function mostrarUsuariosRegistrados() {
   });
 }
 
-cargarDesdeLocalStorage();
+function limpiarLocalStorage() {
+  if (confirm("¿Estás seguro que querés borrar todos los datos? Esta acción es irreversible.")) {
+    localStorage.clear();
+    location.reload();
+  }
+}
 
+cargarDesdeLocalStorage();

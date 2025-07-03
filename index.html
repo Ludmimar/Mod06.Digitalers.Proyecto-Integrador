@@ -30,6 +30,7 @@
     <p><strong>Usuario:</strong> <span id="usuarioEmail"></span></p>
     <button onclick="mostrarFormularioCuenta()">Crear cuenta</button>
     <button onclick="mostrarFormularioMovimiento()">Depositar / Retirar</button>
+    <button onclick="mostrarFormularioTransferencia()">Transferir saldo</button>
     <button onclick="logout()">Cerrar sesión</button>
 
     <div id="formCuenta" style="display: none;">
@@ -55,10 +56,27 @@
       <div id="listaCuentas"></div>
     </div>
 
+    <div id="filtrosMovimientos" style="display: none; margin-top: 20px;">
+    <h3>Filtrar movimientos</h3>
+    <label for="filtroCuenta">Cuenta:</label>
+    <select id="filtroCuenta">
+      <option value="todas">Todas</option>
+    </select>
+
+    <label for="filtroTipo">Tipo:</label>
+    <select id="filtroTipo">
+      <option value="todos">Todos</option>
+      <option value="deposito">Depósito</option>
+      <option value="retiro">Retiro</option>
+      <option value="transferencia saliente">Transferencia Saliente</option>
+      <option value="transferencia recibida">Transferencia Recibida</option>
+    </select>
+
+    <button onclick="mostrarResumenMovimientos()">Aplicar filtros</button>
+  </div>
+
     <!-- ✅ Sección para mostrar resumen de movimientos -->
     <div id="resultados"></div>
-
-    <button onclick="mostrarFormularioTransferencia()">Transferir saldo</button>
 
     <div id="formTransferencia" style="display:none;">
       <h3>Transferencia de saldo</h3>
