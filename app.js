@@ -100,20 +100,39 @@ function login() {
 
 function logout() {
   clienteActual = null;
+
+  // Ocultar secciones
   document.getElementById("dashboard").style.display = "none";
   document.getElementById("login").style.display = "block";
   document.getElementById("registro").style.display = "block";
   document.getElementById("formCuenta").style.display = "none";
   document.getElementById("formMovimiento").style.display = "none";
   document.getElementById("filtrosMovimientos").style.display = "none";
+
+  // Limpiar campos de login
   document.getElementById("email").value = "";
   document.getElementById("password").value = "";
+
+  // Limpiar datos visibles
   document.getElementById("resultados").innerText = "";
   document.getElementById("listaUsuarios").innerHTML = "";
+  document.getElementById("usuarioEmail").innerText = "";
+
+  // 🔧 LIMPIAR EL SELECT DEL FILTRO DE CUENTAS
+  const filtro = document.getElementById("filtroCuenta");
+  if (filtro) filtro.innerHTML = `<option value="todas">Todas</option>`;
+
+  document.getElementById("cuentaOrigen").value = "";
+  document.getElementById("cuentaDestino").value = "";
+  document.getElementById("emailDestino").value = "";
+  document.getElementById("montoTransferencia").value = "";
+
+
   mostrarMensaje("Sesión cerrada correctamente.");
   guardarEnLocalStorage();
   actualizarVisibilidadBotonLimpiar();
 }
+
 
 function actualizarVisibilidadBotonLimpiar() {
   const boton = document.getElementById("botonLimpiar");
@@ -268,9 +287,10 @@ function mostrarResumenMovimientos() {
   let totalIngresos = 0;
   let totalEgresos = 0;
 
-  const cuentasFiltradas = filtroCuenta === "todas"
-    ? clienteActual.cuentas
-    : clienteActual.cuentas.filter(c => c.codigo === filtroCuenta);
+  const cuentasFiltradas = clienteActual.cuentas.filter(c => 
+  filtroCuenta === "todas" || c.codigo === filtroCuenta
+  );
+
 
   if (cuentasFiltradas.length === 0) {
     contenedor.innerHTML += "<p>No hay cuentas que coincidan con el filtro.</p>";
@@ -331,7 +351,11 @@ function actualizarResumenCuentas() {
 
   clienteActual.cuentas.forEach(cuenta => {
     const div = document.createElement("div");
-    div.innerText = `Cuenta: ${cuenta.codigo} | Saldo: $${cuenta.consultarSaldo().toFixed(2)}`;
+    div.className = "card-cuenta"; // <-- agregamos clase
+    div.innerHTML = `
+      <strong>Cuenta:</strong> ${cuenta.codigo}<br>
+      <strong>Saldo:</strong> $${cuenta.consultarSaldo().toFixed(2)}
+    `;
     contenedor.appendChild(div);
   });
 
@@ -346,6 +370,7 @@ function actualizarResumenCuentas() {
     });
   }
 }
+
 
 function mostrarFormularioTransferencia() {
   document.getElementById("formTransferencia").style.display = "block";
