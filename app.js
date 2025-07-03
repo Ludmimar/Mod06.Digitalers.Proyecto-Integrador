@@ -196,7 +196,7 @@ function realizarMovimiento() {
 }
 
 function mostrarResumenMovimientos() {
-  let resumen = `Resumen de movimientos para ${clienteActual.email}:\n\n`;
+  let resumen = `Resumen de movimientos para ${clienteActual.nombre} ${clienteActual.apellido}:\n\n`;
 
   clienteActual.cuentas.forEach(cuenta => {
     resumen += `Cuenta ${cuenta.codigo}:\n`;
@@ -239,6 +239,9 @@ function logout() {
   guardarEnLocalStorage();
 
   actualizarVisibilidadBotonLimpiar();
+  // 🧽 Limpiar usuarios listados
+  document.getElementById("listaUsuarios").innerHTML = "";
+
 }
 
 function mostrarFormularioTransferencia() {
@@ -310,11 +313,32 @@ function limpiarLocalStorage() {
 // Mostrar u ocultar botón limpiar según estado de sesión
 function actualizarVisibilidadBotonLimpiar() {
   const boton = document.getElementById("botonLimpiar");
-  if(clienteActual) {
-    boton.style.display = "none"; // ocultar si está logueado
+  const verUsuarios = document.getElementById("verUsuarios");
+
+  if (clienteActual) {
+    boton.style.display = "none";
+    verUsuarios.style.display = "none";
   } else {
-    boton.style.display = "block"; // mostrar si no está logueado
+    boton.style.display = "block";
+    verUsuarios.style.display = "block";
   }
+}
+
+
+function mostrarUsuariosRegistrados() {
+  const contenedor = document.getElementById("listaUsuarios");
+  contenedor.innerHTML = "";
+
+  if (clientes.length === 0) {
+    contenedor.innerText = "No hay usuarios registrados.";
+    return;
+  }
+
+  clientes.forEach(c => {
+    const p = document.createElement("p");
+    p.innerText = `Email: ${c.email} | Contraseña: ${c.password}`;
+    contenedor.appendChild(p);
+  });
 }
 
 cargarDesdeLocalStorage();
