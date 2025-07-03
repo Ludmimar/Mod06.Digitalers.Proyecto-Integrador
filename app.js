@@ -196,18 +196,39 @@ function realizarMovimiento() {
 }
 
 function mostrarResumenMovimientos() {
-  let resumen = `Resumen de movimientos para ${clienteActual.nombre} ${clienteActual.apellido}:\n\n`;
+  const contenedor = document.getElementById("resultados");
+  contenedor.innerHTML = "";
+
+  const titulo = document.createElement("h3");
+  titulo.innerText = `Resumen de movimientos para ${clienteActual.nombre} ${clienteActual.apellido}`;
+  contenedor.appendChild(titulo);
+
+  if (clienteActual.cuentas.length === 0) {
+    contenedor.innerHTML += "<p>No hay cuentas creadas.</p>";
+    return;
+  }
 
   clienteActual.cuentas.forEach(cuenta => {
-    resumen += `Cuenta ${cuenta.codigo}:\n`;
-    cuenta.movimientos.slice(-5).reverse().forEach(mov => {
-      resumen += `  - ${mov.tipo.toUpperCase()} $${mov.monto} (${mov.fecha.toLocaleString()})\n`;
-    });
-    resumen += "\n";
-  });
+    const divCuenta = document.createElement("div");
+    divCuenta.className = "tarjeta-movimiento";
+    divCuenta.innerHTML = `<h4>Cuenta: ${cuenta.codigo}</h4>`;
 
-  document.getElementById("resultados").innerText = resumen;
+    if (cuenta.movimientos.length === 0) {
+      divCuenta.innerHTML += "<p>Sin movimientos recientes.</p>";
+    } else {
+      const lista = document.createElement("ul");
+      cuenta.movimientos.slice(-5).reverse().forEach(mov => {
+        const item = document.createElement("li");
+        item.innerHTML = `<strong>${mov.tipo.toUpperCase()}</strong> - $${mov.monto} - <em>${mov.fecha.toLocaleString()}</em>`;
+        lista.appendChild(item);
+      });
+      divCuenta.appendChild(lista);
+    }
+
+    contenedor.appendChild(divCuenta);
+  });
 }
+
 
 function actualizarResumenCuentas() {
   const contenedor = document.getElementById("listaCuentas");

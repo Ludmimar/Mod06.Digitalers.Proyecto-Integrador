@@ -67,3 +67,32 @@ button:hover {
   z-index: 1000;
 }
 
+.tarjeta-movimiento {
+  background-color: #f9f9f9;
+  border: 1px solid #ccc;
+  margin: 10px 0;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.tarjeta-movimiento h4 {
+  margin-top: 0;
+  color: #333;
+}
+
+.tarjeta-movimiento ul {
+  list-style-type: none;
+  padding-left: 0;
+}
+
+.tarjeta-movimiento li {
+  padding: 5px 0;
+  border-bottom: 1px dashed #ccc;
+  font-size: 0.95em;
+}
+
+.tarjeta-movimiento li:last-child {
+  border-bottom: none;
+}
+
