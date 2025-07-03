@@ -135,8 +135,20 @@ function registrarCliente() {
   const email = document.getElementById("nuevoEmail").value.trim();
   const password = document.getElementById("nuevoPassword").value.trim();
 
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
   if (!nombre || !apellido || !dni || !email || !password) {
     mostrarMensaje("Todos los campos son obligatorios.");
+    return;
+  }
+
+  if (!/^\d+$/.test(dni)) {
+    mostrarMensaje("El DNI debe contener solo números.");
+    return;
+  }
+
+  if (!emailRegex.test(email)) {
+    mostrarMensaje("El formato del correo electrónico no es válido.");
     return;
   }
 
@@ -159,19 +171,28 @@ function registrarCliente() {
   document.getElementById("nuevoPassword").value = "";
 }
 
+
 function mostrarFormularioCuenta() {
   document.getElementById("formCuenta").style.display = "block";
 }
 
 function crearCuenta() {
-  const monto = document.getElementById("saldoInicial").value;
-  if (isNaN(monto) || monto.trim() === "" || parseFloat(monto) < 0) {
-    mostrarMensaje("Monto inválido.");
+  const montoStr = document.getElementById("saldoInicial").value.trim();
+
+  if (!montoStr || isNaN(montoStr)) {
+    mostrarMensaje("Debes ingresar un monto válido.");
+    return;
+  }
+
+  const monto = parseFloat(montoStr);
+
+  if (monto < 0) {
+    mostrarMensaje("El monto no puede ser negativo.");
     return;
   }
 
   const codigo = "CTA" + Math.floor(Math.random() * 10000);
-  const nuevaCuenta = new Cuenta(codigo, parseFloat(monto));
+  const nuevaCuenta = new Cuenta(codigo, monto);
   clienteActual.agregarCuenta(nuevaCuenta);
   mostrarMensaje(`Cuenta creada con código: ${codigo}`);
   guardarEnLocalStorage();
@@ -181,6 +202,7 @@ function crearCuenta() {
   mostrarResumenMovimientos();
 }
 
+
 function mostrarFormularioMovimiento() {
   document.getElementById("formMovimiento").style.display = "block";
 }
@@ -188,16 +210,24 @@ function mostrarFormularioMovimiento() {
 function realizarMovimiento() {
   const codigoCuenta = document.getElementById("codigoMovimiento").value.trim();
   const tipo = document.getElementById("tipoMovimiento").value;
-  const monto = parseFloat(document.getElementById("montoMovimiento").value);
+  const montoStr = document.getElementById("montoMovimiento").value.trim();
+
+  if (!codigoCuenta || !montoStr) {
+    mostrarMensaje("Todos los campos son obligatorios.");
+    return;
+  }
+
+  const monto = parseFloat(montoStr);
+
+  if (isNaN(monto) || monto <= 0) {
+    mostrarMensaje("El monto debe ser un número mayor a 0.");
+    return;
+  }
+
   const cuenta = clienteActual.cuentas.find(c => c.codigo === codigoCuenta);
 
   if (!cuenta) {
     mostrarMensaje("Cuenta no encontrada.");
-    return;
-  }
-
-  if (isNaN(monto) || monto <= 0) {
-    mostrarMensaje("Monto inválido.");
     return;
   }
 
@@ -222,6 +252,7 @@ function realizarMovimiento() {
   document.getElementById("codigoMovimiento").value = "";
   document.getElementById("montoMovimiento").value = "";
 }
+
 
 function mostrarResumenMovimientos() {
   const contenedor = document.getElementById("resultados");
@@ -324,17 +355,29 @@ function realizarTransferencia() {
   const cuentaOrigenCodigo = document.getElementById("cuentaOrigen").value.trim();
   const emailDestino = document.getElementById("emailDestino").value.trim();
   const cuentaDestinoCodigo = document.getElementById("cuentaDestino").value.trim();
-  const monto = parseFloat(document.getElementById("montoTransferencia").value);
+  const montoStr = document.getElementById("montoTransferencia").value.trim();
 
-  const cuentaOrigen = clienteActual.cuentas.find(c => c.codigo === cuentaOrigenCodigo);
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-  if (!cuentaOrigen) {
-    mostrarMensaje("Cuenta origen no encontrada.");
+  if (!cuentaOrigenCodigo || !emailDestino || !cuentaDestinoCodigo || !montoStr) {
+    mostrarMensaje("Todos los campos son obligatorios.");
     return;
   }
 
+  if (!emailRegex.test(emailDestino)) {
+    mostrarMensaje("Correo electrónico destino no válido.");
+    return;
+  }
+
+  const monto = parseFloat(montoStr);
   if (isNaN(monto) || monto <= 0) {
     mostrarMensaje("Monto inválido.");
+    return;
+  }
+
+  const cuentaOrigen = clienteActual.cuentas.find(c => c.codigo === cuentaOrigenCodigo);
+  if (!cuentaOrigen) {
+    mostrarMensaje("Cuenta origen no encontrada.");
     return;
   }
 
@@ -371,6 +414,7 @@ function realizarTransferencia() {
   document.getElementById("cuentaDestino").value = "";
   document.getElementById("montoTransferencia").value = "";
 }
+
 
 function mostrarUsuariosRegistrados() {
   const contenedor = document.getElementById("listaUsuarios");
